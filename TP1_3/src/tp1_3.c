@@ -24,10 +24,13 @@
 
 #define MAX_PATH_LENGTH 4096
 
-#define USAGE_SYNTAX "[OPTIONS] -i INPUT"
+#define USAGE_SYNTAX "[path/to/directory]"
 #define USAGE_PARAMS "OPTIONS:\n\
   -i, --input  INPUT_FILE  : input file\n\
 ***\n\
+  -a, --all : do not ignore entries starting with .\n\
+  -l, --long : use a long listing format\n\
+  -t, --time : sort by modification time, newest first\n\
   -v, --verbose : enable *verbose* mode\n\
   -h, --help    : display this help\n\
 "
@@ -90,9 +93,11 @@ char* dup_optarg_str()
  */
 static struct option binary_opts[] = 
 {
+  { "all",     no_argument,       0, 'a' },
+  { "long",    no_argument,       0, 'l' },
+  { "time",    no_argument,       0, 't' },
   { "help",    no_argument,       0, 'h' },
   { "verbose", no_argument,       0, 'v' },
-  { "input",   required_argument, 0, 'i' },
   { 0,         0,                 0,  0  } 
 };
 
@@ -102,7 +107,7 @@ static struct option binary_opts[] =
  *
  * \see man 3 getopt_long or getopt
  */ 
-const char* binary_optstr = "hvi:";
+const char* binary_optstr = "althv";
 
 
 
@@ -118,6 +123,9 @@ int main(int argc, char** argv)
    * (could be defined in a structure)
    */
   short int is_verbose_mode = 0;
+  short int print_all_file = 0;
+  short int print_long_information = 0;
+  short int print_by_last_modification = 0;
   char* bin_input_param = NULL;
 
   // Parsing options
@@ -128,12 +136,20 @@ int main(int argc, char** argv)
   {
     switch (opt)
     {
-      case 'i':
-        //input param
-        if (optarg)
-        {
-          bin_input_param = dup_optarg_str();         
-        }
+      case 'a':
+        //all param
+        printf("a yeah\n");
+        print_all_file = 1;
+        break;
+      case 'l':
+        //list param
+        printf("l yeah\n");
+        print_long_information = 1;
+        break;
+      case 't':
+        //list param
+        printf("t yeah\n");
+        print_by_last_modification = 1;
         break;
       case 'v':
         //verbose mode
@@ -154,7 +170,7 @@ int main(int argc, char** argv)
    * Checking binary requirements
    * (could defined in a separate function)
    */
-  if (bin_input_param == NULL)
+  /*if (bin_input_param == NULL)
   {
     dprintf(STDERR, "Bad usage! See HELP [--help|-h]\n");
 
@@ -162,36 +178,16 @@ int main(int argc, char** argv)
     free_if_needed(bin_input_param);
     // Exiting with a failure ERROR CODE (== 1)
     exit(EXIT_FAILURE);
-  }
+  }*/
 
 
   // Printing params
-  dprintf(1, "** PARAMS **\n%-8s: %s\n%-8s: %d\n", 
-          "input",   bin_input_param, 
+  dprintf(1, "** PARAMS **\n%-8s: %d\n%-8s: %d\n%-8s: %d\n%-8s: %d\n", 
+          "all",   print_all_file, 
+          "long",   print_long_information, 
+          "time",   print_by_last_modification, 
           "verbose", is_verbose_mode);
 
-  int src_file = 0;
-  int filesize, n, i;
-  char buffer;
-
-  if((src_file = open(bin_input_param, O_RDONLY)) < 0) {
-    dprintf(STDERR, "\nCannot open %s\n", bin_input_param);
-  }
-
-  filesize = lseek(src_file, (off_t) 0, SEEK_END);
-
-  for(i = filesize -2; i >= 0; i--) {
-    lseek(src_file, (off_t) i, SEEK_SET);
-    n = read(src_file, &buffer, 1);
-
-    if(n != 1) {
-      dprintf(STDERR, "\nCannot read byte\n");
-    }
-
-    printf("%s", &buffer);
-  }
-
-  close(src_file);
 
   // Freeing allocated data
   free_if_needed(bin_input_param);
