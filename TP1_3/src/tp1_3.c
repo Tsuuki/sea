@@ -29,8 +29,10 @@
   -i, --input  INPUT_FILE  : input file\n\
 ***\n\
   -a, --all : do not ignore entries starting with .\n\
+  -c, --color : colorize the output; WHEN can be 'always' (default if omitted), 'auto', or 'never\n\
   -l, --long : use a long listing format\n\
   -t, --time : sort by modification time, newest first\n\
+  -s, --size : print the allocated size of each file, in blocks\n\
   -v, --verbose : enable *verbose* mode\n\
   -h, --help    : display this help\n\
 "
@@ -94,7 +96,9 @@ char* dup_optarg_str()
 static struct option binary_opts[] = 
 {
   { "all",     no_argument,       0, 'a' },
+  { "color",   optional_argument, 0, 'c' },
   { "long",    no_argument,       0, 'l' },
+  { "size",    no_argument,       0, 's' },
   { "time",    no_argument,       0, 't' },
   { "help",    no_argument,       0, 'h' },
   { "verbose", no_argument,       0, 'v' },
@@ -107,7 +111,7 @@ static struct option binary_opts[] =
  *
  * \see man 3 getopt_long or getopt
  */ 
-const char* binary_optstr = "althv";
+const char* binary_optstr = "ac:lsthv";
 
 
 
@@ -124,7 +128,9 @@ int main(int argc, char** argv)
    */
   short int is_verbose_mode = 0;
   short int print_all_file = 0;
+  char* color_mode = NULL;
   short int print_long_information = 0;
+  short int print_size = 0;
   short int print_by_last_modification = 0;
   char* bin_input_param = NULL;
 
@@ -138,17 +144,25 @@ int main(int argc, char** argv)
     {
       case 'a':
         //all param
-        printf("a yeah\n");
         print_all_file = 1;
+        break;
+      case 'c':
+        //color param
+        if (optarg)
+        {
+          color_mode = dup_optarg_str();         
+        }
         break;
       case 'l':
         //list param
-        printf("l yeah\n");
         print_long_information = 1;
+        break;
+      case 's':
+        //list param
+        print_size = 1;
         break;
       case 't':
         //list param
-        printf("t yeah\n");
         print_by_last_modification = 1;
         break;
       case 'v':
@@ -166,25 +180,18 @@ int main(int argc, char** argv)
     }
   } 
 
-  /**
-   * Checking binary requirements
-   * (could defined in a separate function)
-   */
-  /*if (bin_input_param == NULL)
+  if (color_mode == NULL)
   {
-    dprintf(STDERR, "Bad usage! See HELP [--help|-h]\n");
-
-    // Freeing allocated data
-    free_if_needed(bin_input_param);
-    // Exiting with a failure ERROR CODE (== 1)
-    exit(EXIT_FAILURE);
-  }*/
+    color_mode = "always";
+  }
 
 
   // Printing params
-  dprintf(1, "** PARAMS **\n%-8s: %d\n%-8s: %d\n%-8s: %d\n%-8s: %d\n", 
-          "all",   print_all_file, 
-          "long",   print_long_information, 
+  dprintf(1, "** PARAMS **\n%-8s: %d\n%-8s: %s\n%-8s: %d\n%-8s: %d\n%-8s: %d\n%-8s: %d\n", 
+          "all",   print_all_file,
+          "color",   color_mode, 
+          "long",   print_long_information,
+          "size",   print_size, 
           "time",   print_by_last_modification, 
           "verbose", is_verbose_mode);
 
