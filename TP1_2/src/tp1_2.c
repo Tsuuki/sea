@@ -1,11 +1,10 @@
 /**
- * \file skeleton.c
- * \brief Basic parsing options skeleton.
- * \author Pierre L. <pierre1.leroy@orange.com>
+ * \file tp1_2.c
+ * \brief Print reverse a file.
+ * \author Jordan Hiertz
  * \version 0.1
- * \date 10 septembre 2016
+ * \date March 2018
  *
- * Basic parsing options skeleton exemple c file.
  */
 #include<stdio.h>
 #include<stdlib.h>
@@ -18,6 +17,8 @@
 
 #include<getopt.h>
 
+#include "../include/tp1_2.h"
+#include "../include/check.h"
 
 #define STDOUT 1
 #define STDERR 2
@@ -32,26 +33,11 @@
   -h, --help    : display this help\n\
 "
 
-/**
- * Procedure which displays binary usage
- * by printing on stdout all available options
- *
- * \return void
- */
 void print_usage(char* bin_name)
 {
   dprintf(1, "USAGE: %s %s\n\n%s\n", bin_name, USAGE_SYNTAX, USAGE_PARAMS);
 }
 
-
-/**
- * Procedure checks if variable must be free
- * (check: ptr != NULL)
- *
- * \param void* to_free pointer to an allocated mem
- * \see man 3 free
- * \return void
- */
 void free_if_needed(void* to_free)
 {
   if (to_free != NULL) free(to_free);  
@@ -141,9 +127,7 @@ int main(int argc, char** argv)
         break;
       case 'h':
         print_usage(argv[0]);
-
         free_if_needed(bin_input_param);
- 
         exit(EXIT_SUCCESS);
       default :
         break;
@@ -157,10 +141,7 @@ int main(int argc, char** argv)
   if (bin_input_param == NULL)
   {
     dprintf(STDERR, "Bad usage! See HELP [--help|-h]\n");
-
-    // Freeing allocated data
     free_if_needed(bin_input_param);
-    // Exiting with a failure ERROR CODE (== 1)
     exit(EXIT_FAILURE);
   }
 
@@ -174,9 +155,7 @@ int main(int argc, char** argv)
   int filesize, n, i;
   char buffer;
 
-  if((src_file = open(bin_input_param, O_RDONLY)) < 0) {
-    dprintf(STDERR, "\nCannot open %s\n", bin_input_param);
-  }
+  CHECK((src_file = open(bin_input_param, O_RDONLY)) > 0);
 
   filesize = lseek(src_file, (off_t) 0, SEEK_END);
 
@@ -193,9 +172,7 @@ int main(int argc, char** argv)
 
   close(src_file);
 
-  // Freeing allocated data
   free_if_needed(bin_input_param);
-
 
   return EXIT_SUCCESS;
 }

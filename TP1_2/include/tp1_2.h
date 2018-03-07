@@ -1,5 +1,5 @@
-#ifndef __TP1_1_H__
-#define __TP1_1_H__
+#ifndef __TP1_2_H__
+#define __TP1_2_H__
 
 /**
  * Procedure which displays binary usage
@@ -29,4 +29,4 @@ char* dup_optarg_str();
  */
 void free_if_needed(void*);
 
-#endif /** __TP1_1_H__ **/
+#endif /** __TP1_2_H__ **/
