@@ -1,9 +1,9 @@
 /**
- * \file skeleton.c
- * \brief Basic parsing options skeleton.
- * \author Pierre L. <pierre1.leroy@orange.com>
+ * \file tp1_1.c
+ * \brief Copy content file to another.
+ * \author Jordan Hiertz
  * \version 0.1
- * \date 10 septembre 2016
+ * \date March 2018
  *
  * Basic parsing options skeleton exemple c file.
  */
@@ -14,6 +14,8 @@
 
 #include<getopt.h>
 
+#include "../include/tp1_1.h"
+#include "../include/check.h"
 
 #define STDOUT 1
 #define STDERR 2
@@ -31,38 +33,16 @@
   -h, --help    : display this help\n\
 "
 
-/**
- * Procedure which displays binary usage
- * by printing on stdout all available options
- *
- * \return void
- */
 void print_usage(char* bin_name)
 {
   dprintf(1, "USAGE: %s %s\n\n%s\n", bin_name, USAGE_SYNTAX, USAGE_PARAMS);
 }
 
-
-/**
- * Procedure checks if variable must be free
- * (check: ptr != NULL)
- *
- * \param void* to_free pointer to an allocated mem
- * \see man 3 free
- * \return void
- */
 void free_if_needed(void* to_free)
 {
   if (to_free != NULL) free(to_free);  
 }
 
-
-/**
- *
- * \see man 3 strndup
- * \see man 3 perror
- * \return
- */
 char* dup_optarg_str()
 {
   char* str = NULL;
@@ -78,7 +58,6 @@ char* dup_optarg_str()
 
   return str;
 }
-
 
 /**
  * Binary options declaration
@@ -103,8 +82,6 @@ static struct option binary_opts[] =
  * \see man 3 getopt_long or getopt
  */ 
 const char* binary_optstr = "hvi:o:";
-
-
 
 /**
  * Binary main loop
@@ -171,6 +148,7 @@ int main(int argc, char** argv)
     free_if_needed(bin_input_param);
     free_if_needed(bin_output_param);
     // Exiting with a failure ERROR CODE (== 1)
+    print_usage(argv[0]);
     exit(EXIT_FAILURE);
   }
 
@@ -182,22 +160,16 @@ int main(int argc, char** argv)
           "verbose", is_verbose_mode);
 
   FILE *file;
-  file = fopen(bin_input_param, "r");
+  CHECK((file = fopen(bin_input_param, "r")) != NULL);
 
   FILE *file2;
-  file2 = fopen(bin_output_param, "w");
-
-  if(!file) {
-    dprintf(STDERR, "\nCannot open %s\n", bin_input_param);
-  }
+  CHECK((file2 = fopen(bin_output_param, "w")) != NULL);
 
   char buffer[CHUNK];
   size_t nread;
 
-
   while((nread = fread(buffer, sizeof(char), sizeof buffer, file)) > 0) {
-    fwrite(buffer, sizeof(char), nread, file2);
-      
+    fwrite(buffer, sizeof(char), nread, file2);   
   }
 
   fclose(file);
@@ -206,7 +178,6 @@ int main(int argc, char** argv)
   // Freeing allocated data
   free_if_needed(bin_input_param);
   free_if_needed(bin_output_param);
-
 
   return EXIT_SUCCESS;
 }
