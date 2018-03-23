@@ -15,38 +15,24 @@
 #include<sys/types.h>
 #include<sys/wait.h>
 
+#include "../include/tp2_1.h"
+#include "../include/check.h"
 
 #define STDOUT 1
 #define STDERR 2
 
-/**
- * Procedure checks if variable must be free
- * (check: ptr != NULL)
- *
- * \param void* to_free pointer to an allocated mem
- * \see man 3 free
- * \return void
- */
 void free_if_needed(void* to_free)
 {
   if (to_free != NULL) free(to_free);  
 }
 
-/**
- * Binary main loop
- *
- * \return 1 if it exit successfully 
- */
 int main(int argc, char** argv)
 {
 
   pid_t pid = fork();
   int status;
   
-  if(pid == -1) {
-    dprintf(STDERR, "Failed to create fork\n");
-    exit(EXIT_FAILURE);
-  }
+  CHECK(pid != -1);
 
   if(pid == 0) {
     printf("On est dans le fils\n%-8s: %d\n%-8s: %d\n", 
