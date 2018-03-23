@@ -1,11 +1,10 @@
 /**
- * \file skeleton.c
- * \brief Basic parsing options skeleton.
- * \author Pierre L. <pierre1.leroy@orange.com>
+ * \file tp1_3.c
+ * \brief Ls like.
+ * \author Jordan Hiertz
  * \version 0.1
- * \date 10 septembre 2016
+ * \date March 2018
  *
- * Basic parsing options skeleton exemple c file.
  */
 #include<stdio.h>
 #include<stdlib.h>
@@ -15,105 +14,24 @@
 #include<sys/stat.h>
 #include<fcntl.h>
 #include<unistd.h>
-
+#include<dirent.h>
+#include <time.h>
 #include<getopt.h>
+#include <grp.h>
+#include <pwd.h>
 
+#include "../include/tp1_3.h"
+#include "../include/check.h"
 
 #define STDOUT 1
 #define STDERR 2
 
 #define MAX_PATH_LENGTH 4096
 
-#define USAGE_SYNTAX "[path/to/directory]"
-#define USAGE_PARAMS "OPTIONS:\n\
-  -i, --input  INPUT_FILE  : input file\n\
-***\n\
-  -a, --all : do not ignore entries starting with .\n\
-  -c, --color : colorize the output; WHEN can be 'always' (default if omitted), 'auto', or 'never\n\
-  -l, --long : use a long listing format\n\
-  -t, --time : sort by modification time, newest first\n\
-  -s, --size : print the allocated size of each file, in blocks\n\
-  -v, --verbose : enable *verbose* mode\n\
-  -h, --help    : display this help\n\
-"
-
-/**
- * Procedure which displays binary usage
- * by printing on stdout all available options
- *
- * \return void
- */
-void print_usage(char* bin_name)
-{
-  dprintf(1, "USAGE: %s %s\n\n%s\n", bin_name, USAGE_SYNTAX, USAGE_PARAMS);
-}
-
-
-/**
- * Procedure checks if variable must be free
- * (check: ptr != NULL)
- *
- * \param void* to_free pointer to an allocated mem
- * \see man 3 free
- * \return void
- */
 void free_if_needed(void* to_free)
 {
   if (to_free != NULL) free(to_free);  
 }
-
-
-/**
- *
- * \see man 3 strndup
- * \see man 3 perror
- * \return
- */
-char* dup_optarg_str()
-{
-  char* str = NULL;
-
-  if (optarg != NULL)
-  {
-    str = strndup(optarg, MAX_PATH_LENGTH);
-    
-    // Checking if ERRNO is set
-    if (str == NULL) 
-      perror(strerror(errno));
-  }
-
-  return str;
-}
-
-
-/**
- * Binary options declaration
- * (must end with {0,0,0,0})
- *
- * \see man 3 getopt_long or getopt
- * \see struct option definition
- */
-static struct option binary_opts[] = 
-{
-  { "all",     no_argument,       0, 'a' },
-  { "color",   optional_argument, 0, 'c' },
-  { "long",    no_argument,       0, 'l' },
-  { "size",    no_argument,       0, 's' },
-  { "time",    no_argument,       0, 't' },
-  { "help",    no_argument,       0, 'h' },
-  { "verbose", no_argument,       0, 'v' },
-  { 0,         0,                 0,  0  } 
-};
-
-/**
- * Binary options string
- * (linked to optionn declaration)
- *
- * \see man 3 getopt_long or getopt
- */ 
-const char* binary_optstr = "ac:lsthv";
-
-
 
 /**
  * Binary main loop
@@ -122,83 +40,95 @@ const char* binary_optstr = "ac:lsthv";
  */
 int main(int argc, char** argv)
 {
-  /**
-   * Binary variables
-   * (could be defined in a structure)
-   */
-  short int is_verbose_mode = 0;
-  short int print_all_file = 0;
-  char* color_mode = NULL;
-  short int print_long_information = 0;
-  short int print_size = 0;
-  short int print_by_last_modification = 0;
-  char* bin_input_param = NULL;
 
-  // Parsing options
-  int opt = -1;
-  int opt_idx = -1;
+  dprintf(1, "USAGE\n%-4s%s", "-", "ls path/to/dir\n\n");
 
-  while ((opt = getopt_long(argc, argv, binary_optstr, binary_opts, &opt_idx)) != -1)
-  {
-    switch (opt)
-    {
-      case 'a':
-        //all param
-        print_all_file = 1;
-        break;
-      case 'c':
-        //color param
-        if (optarg)
-        {
-          color_mode = dup_optarg_str();         
-        }
-        break;
-      case 'l':
-        //list param
-        print_long_information = 1;
-        break;
-      case 's':
-        //list param
-        print_size = 1;
-        break;
-      case 't':
-        //list param
-        print_by_last_modification = 1;
-        break;
-      case 'v':
-        //verbose mode
-        is_verbose_mode = 1;
-        break;
-      case 'h':
-        print_usage(argv[0]);
+  // Struct needed to display information
+  struct dirent *dir;
+  struct stat st;
+  struct passwd *pw;
+  struct group  *gr;
+  struct tm lt;
+  DIR* rep = NULL;
 
-        free_if_needed(bin_input_param);
- 
-        exit(EXIT_SUCCESS);
-      default :
-        break;
-    }
-  } 
+  char *str = malloc(sizeof(char) * MAX_PATH_LENGTH);
+  char *path = malloc(sizeof(char) * MAX_PATH_LENGTH);
 
-  if (color_mode == NULL)
-  {
-    color_mode = "always";
+  // Asking for ls path
+  printf(">");
+  fgets(str, MAX_PATH_LENGTH, stdin);
+
+  // Remove ls to get the path
+  str += 3;
+  str[strlen(str) - 1] = '\0';
+
+  CHECK((rep = opendir(str)) != NULL);
+
+  while ((dir = readdir(rep)) != NULL){
+    memset(path,0,strlen(path));
+    strcat(path, str);
+    strcat(path, "/");
+    strcat(path, dir->d_name);
+    CHECK(stat(path, &st) == 0);
+    pw = getpwuid(st.st_uid);
+    gr = getgrgid(st.st_gid);
+    lt = *localtime(&st.st_mtime);
+
+    writePermissionFile(st);
+    writeNumberOfLink(st);
+    writeUserName(pw);
+    writeGroupName(gr);
+    writeFileSize(st);
+    writeDateModif(lt);
+    writeFileName(dir);
+
+    printf("\n");
   }
 
-
-  // Printing params
-  dprintf(1, "** PARAMS **\n%-8s: %d\n%-8s: %s\n%-8s: %d\n%-8s: %d\n%-8s: %d\n%-8s: %d\n", 
-          "all",   print_all_file,
-          "color",   color_mode, 
-          "long",   print_long_information,
-          "size",   print_size, 
-          "time",   print_by_last_modification, 
-          "verbose", is_verbose_mode);
-
-
+  CHECK(closedir(rep) != -1);
   // Freeing allocated data
-  free_if_needed(bin_input_param);
-
 
   return EXIT_SUCCESS;
+}
+
+void writePermissionFile(struct stat fileStat) {
+    printf( (S_ISDIR(fileStat.st_mode)) ? "d" : "-");
+    printf( (fileStat.st_mode & S_IRUSR) ? "r" : "-");
+    printf( (fileStat.st_mode & S_IWUSR) ? "w" : "-");
+    printf( (fileStat.st_mode & S_IXUSR) ? "x" : "-");
+    printf( (fileStat.st_mode & S_IRGRP) ? "r" : "-");
+    printf( (fileStat.st_mode & S_IWGRP) ? "w" : "-");
+    printf( (fileStat.st_mode & S_IXGRP) ? "x" : "-");
+    printf( (fileStat.st_mode & S_IROTH) ? "r" : "-");
+    printf( (fileStat.st_mode & S_IWOTH) ? "w" : "-");
+    printf( (fileStat.st_mode & S_IXOTH) ? "x" : "-");
+}
+
+void writeNumberOfLink(struct stat fileStat) {
+  printf("%3lu%-3s",fileStat.st_nlink, "");
+}
+
+void writeFileSize(struct stat fileStat) {
+  printf("%-8lu",fileStat.st_size);
+}
+
+void writeUserName(struct passwd *pw) {
+  printf("%-8s", pw->pw_name);
+}
+
+void writeGroupName(struct group *gr) {
+  printf("%-8s", gr->gr_name);
+}
+
+void writeFileName(struct dirent *dir) {
+  if(dir->d_type == 8)
+    printf("%s", dir->d_name);
+  else
+    printf("%s%s%s", "\x1B[34m", dir->d_name, "\x1B[0m"); 
+}
+
+void writeDateModif(struct tm lt) {
+  char buffer[26];
+  strftime(buffer, 26, "%a %d %H:%M", &lt);
+  printf("%-16s", buffer);
 }
