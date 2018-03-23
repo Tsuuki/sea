@@ -1,11 +1,10 @@
 /**
- * \file skeleton.c
- * \brief Basic parsing options skeleton.
- * \author Pierre L. <pierre1.leroy@orange.com>
+ * \file tp2_1.c
+ * \brief proc exercice
+ * \author Jordan Hiertz
  * \version 0.1
- * \date 10 septembre 2016
+ * \date March 2018
  *
- * Basic parsing options skeleton exemple c file.
  */
 #include<stdio.h>
 #include<stdlib.h>

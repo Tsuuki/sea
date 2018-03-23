@@ -1,11 +1,10 @@
 /**
- * \file skeleton.c
- * \brief Basic parsing options skeleton.
- * \author Pierre L. <pierre1.leroy@orange.com>
+ * \file tp2_2.c
+ * \brief proc exercice
+ * \author Jordan Hiertz
  * \version 0.1
- * \date 10 septembre 2016
+ * \date March 2018
  *
- * Basic parsing options skeleton exemple c file.
  */
 #include<stdio.h>
 #include<stdlib.h>
@@ -15,32 +14,19 @@
 #include<sys/types.h>
 #include<sys/wait.h>
 
+#include "../include/check.h"
+#include "../include/tp2_2.h"
 
 #define STDOUT 1
 #define STDERR 2
 
-#define USAGE_SYNTAX "First argument"
+#define USAGE_SYNTAX "WORD"
 
-/**
- * Procedure which displays binary usage
- * by printing on stdout all available options
- *
- * \return void
- */
 void print_usage(char* bin_name)
 {
   dprintf(1, "USAGE: %s %s\n", bin_name, USAGE_SYNTAX);
 }
 
-
-/**
- * Procedure checks if variable must be free
- * (check: ptr != NULL)
- *
- * \param void* to_free pointer to an allocated mem
- * \see man 3 free
- * \return void
- */
 void free_if_needed(void* to_free)
 {
   if (to_free != NULL) free(to_free);  
@@ -61,42 +47,51 @@ int main(int argc, char** argv)
 
   printf("Vous avez écrit : %s\n\n", argv[1]);
 
-  pid_t pid = fork();
-  int status;
-  
-  if(pid == -1) {
-    dprintf(STDERR, "Failed to create fork\n");
-    exit(EXIT_FAILURE);
-  }
+  if(argv[2] == NULL) {
+    pid_t pid = fork();
+    int status;
+    
+    CHECK(pid != -1);
 
-  if(pid == 0) {
-    printf("On est dans le fils\n%-8s: %d\n", 
-      "PID",   getpid());
+    if(pid == 0) {
+      printf("On est dans le fils\n%-8s: %d\n", 
+        "PID",   getpid());
 
-    int saveSTDOUT = dup(STDOUT);
-    close(STDOUT);
+      int saveSTDOUT = dup(STDOUT);
+      close(STDOUT);
+      printf("blbl %d\n", saveSTDOUT);
 
-    char template[] = "/tmp/proc-exercice-XXXXXX";
-    int file = mkstemp(template);
+      
+      char template[] = "/tmp/proc-exercice-XXXXXX";
+      int file = mkstemp(template);
+      CHECK(file != -1);
 
-    dup2(saveSTDOUT, STDOUT);
+      dup2(saveSTDOUT, STDOUT);
 
-    printf("\nFile : %d\n", file);
+      printf("\nDescripteur file : %d\n", file);
 
-    exit(getpid() % 10);
-  }
-  else {
-    wait(&status);
+      // On execute le programme sans recréer de fils
+      char* param[] = {argv[0], argv[1], "1", NULL};
+      execv(argv[0], param);
 
-    printf("\nOn est dans le père\n%-8s: %d\n", 
-    "PID fils",   pid);
+      //close(fileTemp);
+      printf("%s\n", argv[1]);
 
-    if(WIFEXITED(status)) {
-      printf("\nFils terminé normalement\n%-8s: %d\n",
-        "Code retour fils", WEXITSTATUS(status));
+      exit(getpid() % 10);
     }
     else {
-      printf("\nFils terminé anormalement\n");
+      wait(&status);
+
+      printf("\nOn est dans le père\n%-8s: %d\n", 
+      "PID fils",   pid);
+
+      if(WIFEXITED(status)) {
+        printf("\nFils terminé normalement\n%-8s\n",
+          "That's all folks");
+      }
+      else {
+        printf("\nFils terminé anormalement\n");
+      }
     }
   }
 
