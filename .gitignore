@@ -45,6 +45,12 @@ bin/
 *.idb
 *.pdb
 
+# War from Docker
+*.war
+
+# vscode settings
+.vscode
+
 # Kernel Module Compile Results
 *.mod*
 *.cmd
