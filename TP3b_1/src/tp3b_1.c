@@ -1,11 +1,10 @@
 /**
- * \file skeleton.c
- * \brief Basic parsing options skeleton.
- * \author Pierre L. <pierre1.leroy@orange.com>
+ * \file tp3b_1.c
+ * \author Jordan Hiertz
  * \version 0.1
- * \date 10 septembre 2016
+ * \date March 2018
  *
- * Basic parsing options skeleton exemple c file.
+ * Find Max and Min in tab with thread and mutex
  */
 #include<stdio.h>
 #include<stdlib.h>
@@ -17,6 +16,8 @@
 #include<time.h>
 #include <pthread.h>
 
+#include "../include/check.h"
+#include "../include/tp3b_1.h"
 
 #define STDOUT 1
 #define STDERR 2
