@@ -11,10 +11,9 @@
 #include<string.h>
 #include<errno.h>
 #include<unistd.h>
-#include<sys/types.h>
 #include <sys/types.h>
 #include <fcntl.h>
-#include<sys/wait.h>
+#include <sys/wait.h>
 
 #include "../include/check.h"
 #include "../include/tp2_3.h"
