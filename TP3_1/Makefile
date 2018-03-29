@@ -4,6 +4,7 @@ LDFLAGS=-I ./include/
 
 SRC_DIR=./src
 INC_DIR=./include
+OBJ_DIR=./obj
 BIN_DIR=./bin
 DOC_DIR=./doc
 GCOV_DIR=./gcov
@@ -14,6 +15,7 @@ LCOV_REPORT=report.info
 
 SRC=$(wildcard $(SRC_DIR)/*.c)
 OBJ=$(SRC:.c=.o)
+OBJ2= $(patsubst %.c, $(OBJ_DIR)/%.o, $(notdir $(SRC)))
 EXEC=tp3_1
 
 GEXEC=$(EXEC).cov
@@ -24,10 +26,12 @@ AR_NAME=archive_$(EXEC).tar.gz
 all: $(SRC) $(EXEC)
     
 %.o:%.c
-	$(CC) $(CFLAGS) $< $(LDFLAGS) -o $@
+	@mkdir -p $(OBJ_DIR)
+	$(CC) $(CFLAGS) $< $(LDFLAGS) -o $(OBJ_DIR)/$(notdir $@)
 
-$(EXEC): $(OBJ) 
-	$(CC) -o $(BIN_DIR)/$@ -Wall $(LDFLAGS) $(OBJ)
+$(EXEC): $(OBJ)
+	@mkdir -p $(BIN_DIR)
+	$(CC) -o $(BIN_DIR)/$@ -Wall $(LDFLAGS) $(OBJ2)
 
 $(GEXEC):
 	$(CC) $(GCOVFLAGS) -o $(GCOV_DIR)/$@ -Wall $(LDFLAGS) $(SRC)

@@ -1,18 +1,18 @@
 /**
- * \file skeleton.c
- * \brief Basic parsing options skeleton.
- * \author Pierre L. <pierre1.leroy@orange.com>
+ * \file tp3_1.c
+ * \author Jordan Hiertz
  * \version 0.1
- * \date 10 septembre 2016
+ * \date March 2018
  *
- * Basic parsing options skeleton exemple c file.
+ * Count number of SIGINT received and terminate with a SIGTERM
  */
 #include<stdio.h>
 #include<stdlib.h>
-#include<string.h>
-#include<errno.h>
 #include<signal.h>
 #include<unistd.h>
+
+#include "../include/tp3_1.h"
+#include "../include/check.h"
 
 #define STDOUT 1
 #define STDERR 2
@@ -39,9 +39,15 @@ void sig_handler(int signo) {
  */
 int main(int argc, char** argv)
 {
-  //TODO use sigaction ?
-  signal(SIGINT, sig_handler);
-  signal(SIGTERM, sig_handler);
+  struct sigaction sa;
+
+  sa.sa_handler = &sig_handler;
+  sa.sa_flags = SA_RESTART;
+
+  sigfillset(&sa.sa_mask);
+
+  CHECK(sigaction(SIGINT, &sa, NULL) != -1);
+  CHECK(sigaction(SIGTERM, &sa, NULL) != -1);
 
   while(keepRunning) {
     sleep(1);
