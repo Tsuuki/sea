@@ -1,0 +1,11 @@
+1 - Benchmark disk
+
+    dd if=/dev/zero of=fileTemp bs=1024 count=2M
+    ~100 mo/s
+
+    echo "8:0 5242880" > tp1_blkio/blkio.throttle.write_bps_device --> sda limité à 5mo
+    sudo cgexec -g blkio:tp1_blkio dd if=/dev/zero of=fileTemp bs=1024 count=2M oflag=direct
+
+2 - Memory limitation
+
+    echo "52428800" > /sys/fs/cgroup/memory/tp1_memory/memory.limit_in_bytes
