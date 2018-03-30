@@ -1,6 +1,7 @@
 CC=gcc
 CFLAGS=-Wall -c
 LDFLAGS=-I ./include/
+LIB= -lpthread
 
 SRC_DIR=./src
 INC_DIR=./include
@@ -31,7 +32,7 @@ all: $(SRC) $(EXEC)
 
 $(EXEC): $(OBJ)
 	@mkdir -p $(BIN_DIR)
-	$(CC) -o $(BIN_DIR)/$@ -Wall $(LDFLAGS) $(OBJ2)
+	$(CC) -o $(BIN_DIR)/$@ -Wall $(LDFLAGS) $(OBJ2) $(LIB)
 
 $(GEXEC):
 	$(CC) $(GCOVFLAGS) -o $(GCOV_DIR)/$@ -Wall $(LDFLAGS) $(SRC)

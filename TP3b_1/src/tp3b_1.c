@@ -53,7 +53,7 @@ void initTab() {
   printf("Fin de la génération\n");
 }
 
-void * min_max(void * args) {
+void *min_max(void *args) {
 
   struct Arg_struct *par = args;
 
@@ -96,15 +96,11 @@ void initThread(int nbThread) {
       args[i].length += mod;
     }
 
-    if(pthread_create(&threads[i], NULL, min_max, (void *)&args[i]) != 0) {
-        printf("error : Cannot create thread # %d\n", i);
-    }
+    CHECK((pthread_create(&threads[i], NULL, min_max, (void *)&args[i])) == 0);
   }
 
   for(int i = 0; i < nbThread; i++) {
-    if(pthread_join(threads[i], &retvals[i]) != 0) {
-      printf("error : Cannot join thread # %d\n", i);
-    }
+    CHECK(pthread_join(threads[i], &retvals[i]) == 0);
   }
 
   gettimeofday(&after, NULL);
@@ -120,9 +116,7 @@ void initValues() {
   pthread_mutex_destroy(&resultat.mutex);
   resultat.min = tab[0];
   resultat.max = tab[0];
-  if(pthread_mutex_init(&resultat.mutex, NULL) != 0) {
-      printf("\nmutex init failed");
-  }
+  CHECK(pthread_mutex_init(&resultat.mutex, NULL) == 0);
 }
 
 /**
